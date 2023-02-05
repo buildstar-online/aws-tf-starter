@@ -1,1 +1,1 @@
-# AWS EC2 Terraform
+# AWS EC2 GPU Instances

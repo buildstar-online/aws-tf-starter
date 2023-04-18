@@ -22,22 +22,6 @@ variable "project_azs" {
   type = list(string)
 }
 
-variable "ebs_az" {
-  type = string
-}
-
-variable "ebs_size" {
-  type = number
-}
-
-variable "ebs_type" {
-  type = string
-}
-
-variable "ebs_encrypted" {
-  type = string
-}
-
 variable "rbs_size" {
   type = number
 }

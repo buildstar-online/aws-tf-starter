@@ -92,8 +92,8 @@ module "ec2_instance" {
   subnet_id                   = element(module.vpc.public_subnets, 0)
   associate_public_ip_address = true
   user_data                   = file("user-data.yaml")
-  user_data_replace_on_change = true
-  availability_zone           = var.ebs_az
+  #user_data_replace_on_change = true
+  availability_zone           = var.project_azs[0]
   ebs_optimized               = true
 
 

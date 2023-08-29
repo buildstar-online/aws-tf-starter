@@ -43,7 +43,6 @@ jobs:
           -e "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
           -v $(pwd):/terraform -w /terraform \
           hashicorp/terraform plan \
-          -var="hcloud_token=${{ secrets.HCLOUD_TOKEN }}" \
           -no-color -lock=false -out terraform.plan
       continue-on-error: false
       shell: bash
@@ -56,7 +55,6 @@ jobs:
           -e "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
           -v $(pwd):/terraform -w /terraform \
           hashicorp/terraform apply \
-          -var="hcloud_token=${{ secrets.HCLOUD_TOKEN }}" \
           -no-color -auto-approve -input=false
       continue-on-error: false
       shell: bash

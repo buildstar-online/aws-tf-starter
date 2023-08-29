@@ -1,0 +1,17 @@
+{
+  "Id": "Policy1693326981083",
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "Stmt1693326940789",
+      "Action": "s3:*",
+      "Effect": "Allow",
+      "Resource": "arn:aws:s3:::buildstar-terraform-state",
+      "Principal": {
+        "AWS": [
+          "arn:aws:iam::212524480309:user/terraform"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "Stmt1693327351429",
+      "Action": "dynamodb:*",
+      "Effect": "Allow",
+      "Resource": "arn:aws:dynamodb:eu-central-1:212524480309:table/Terraform-backend-lock"
+    }
+  ]
+}

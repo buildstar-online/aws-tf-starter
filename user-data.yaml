@@ -1,80 +1,74 @@
 #cloud-config
-groups:
-  - docker
+hostname: controlplane
+disable_root: false
+network:
+  config: disabled
 users:
-  - name: admin
-    groups: users, admin, sudo, docker
-    shell: /bin/bash
+  - name: friend
+    groups: users, admin, docker, sudo, kvm
     sudo: ALL=(ALL) NOPASSWD:ALL
-    no_create_home: false
-    ssh_import_id:
-      - gh:<some-user-goes-here>
-    lock_passwd: false
-    passwd: <encrypted-password-goes-here>
-bootcmd:
-  - file -s /dev/nvme1n1
-  - mkfs -t xfs /dev/nvme1n1
-  - mkdir -p /prometheus
-  - mount /dev/nvme1n1 /prometheus
-write_files:
-  - path: /etc/systemd/system/node_exporter.service
-    content: |
-      [Unit]
-      Description=Prometheus Node Exporter
-      Documentation=https://github.com/prometheus/node_exporter
-      After=network-online.target
-
-      [Service]
-      User=root
-      EnvironmentFile=/etc/default/node_exporter
-      ExecStart=/opt/node_exporter/node_exporter $OPTIONS
-      Restart=on-failure
-      RestartSec=5
-
-      [Install]
-      WantedBy=multi-user.target
-  - path: /etc/default/node_exporter
-    content: |
-      OPTIONS=''
-  - path: /prometheus/prometheus.yml
-    content: |
-      global:
-        scrape_interval:     5s
-        evaluation_interval: 5s
-
-      rule_files:
-        # - "first.rules"
-        # - "second.rules"
-
-      scrape_configs:
-        - job_name: prometheus
-          static_configs:
-            - targets: ['localhost:9090']
-            - targets: ['VM_IP_GOES_HERE:9100']
+    shell: /bin/bash
+    lock_passwd: true
 package_update: true
 package_upgrade: true
-packages:
-  - docker.io
-  - whois
-  - wget
+packages: 
+  - wireguard
+  - openresolv
+  - ssh-import-id
+  - sudo
   - curl
-  - vim
-  - xterm
-  - xinit
-  - x11vnc
-  - xfce4
-  - xfce4-goodies
-  - ubuntu-drivers-common
+  - tmux
+  - netplan.io
+  - apt-transport-https
+  - ca-certificates
+  - software-properties-common
+  - htop
+  - iotop
+  - git-extras
+  - rsyslog
+  - fail2ban
+  - gpg
+  - open-iscsi
+  - nfs-common
+  - ncdu
 runcmd:
-  - ubuntu-drivers autoinstall
-  - sed -i "s/VM_IP_GOES_HERE/$(curl icanhazip.com)/g" /prometheus/prometheus.yml
-  - wget -O /opt/node_exporter-1.4.0.linux-amd64.tar.gz https://github.com/prometheus/node_exporter/releases/download/v1.4.0/node_exporter-1.4.0.linux-amd64.tar.gz
-  - tar -xvf /opt/node_exporter-1.4.0.linux-amd64.tar.gz -C /opt
-  - rm /opt/node_exporter-1.4.0.linux-amd64.tar.gz
-  - rm /opt/node_exporter
-  - ln -s node_exporter-1.4.0.linux-amd64 /opt/node_exporter
+  #####################
+  # Import SSH keys
+  - sudo -u friend ssh-import-id-gh cloudymax  
+  - sudo -u friend ssh-import-id-gh jessebot
+  ######################
+  # Install YQ
+  - wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq &&\
+  - chmod +x /usr/bin/yq
+  ######################
+  # Install Docker
+  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+  - echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+  - sudo apt-get update 
+  - sudo apt-get install -y docker-ce
+  ########################
+  # Install Docker Compose
+  - sudo -u friend -i mkdir -p /home/friend/.docker/cli-plugins/
+  - sudo -u friend -i curl -SL https://github.com/docker/compose/releases/download/v2.17.3/docker-compose-linux-x86_64 -o  /home/friend/.docker/cli-plugins/docker-compose
+  - sudo chmod +x /home/friend/.docker/cli-plugins/docker-compose
+  ########################
+  # Brew and Python3
+  - wget https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh
+  - chmod +x /install.sh
+  - chmod 777 /install.sh
+  - sudo -u friend NONINTERACTIVE=1 /bin/bash /install.sh
+  - sudo -u friend /home/linuxbrew/.linuxbrew/bin/brew shellenv >> /home/friend/.profile
+  - sudo -u friend /home/linuxbrew/.linuxbrew/opt/python@3.11/libexec/bin >> /home/friend/.profile
+  - sudo -u friend /home/linuxbrew/.linuxbrew/bin/brew install python@3.11 bitwarden-cli b2-tools k9s neovim
+  - sudo -u friend /home/linuxbrew/.linuxbrew/bin/pip3.11 install smol-k8s-lab onboardme
+  - sudo mkdir -p /home/friend/.config/smol-ka8s-lab
+  - sudo chown -R friend:friend /home/linuxbrew
+  - sudo chown -R friend:friend /home/friend
+  ########################
+  # Start system services
   - systemctl daemon-reload
-  - systemctl enable node_exporter
-  - systemctl restart node_exporter
-  - docker run -d -p 9090:9090 --mount source=prometheus,target=/prometheus -v /prometheus/prometheus.yml:/etc/prometheus/prometheus.yml prom/prometheus
-  - docker run -d --name=grafana -p 3000:3000 grafana/grafana-enterprise
+  - sudo systemctl enable fail2ban
+  - sudo systemctl start fail2ban
+  ########################
+  # Pull onboardme
+  - docker pull jessebot/onboardme:debian12-devops

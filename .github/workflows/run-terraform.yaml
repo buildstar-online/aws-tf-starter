@@ -53,7 +53,7 @@ jobs:
           -e "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" \
           -e "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
           -v $(pwd):/terraform -w /terraform \
-          hashicorp/terraform apply \
+          hashicorp/terraform destroy \
           -no-color -auto-approve -input=false
       continue-on-error: false
       shell: bash

@@ -22,6 +22,13 @@ aws dynamodb create-table --table-name Terraform-backend-lock \
   --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5
 ```
 
+## IAM Setup
+
+```bash
+aws iam create-policy --policy-name Terraform-Backend-Policy \
+  --policy-document file://policy.json
+
+```
 ## Run Terraform
 
 ```bash

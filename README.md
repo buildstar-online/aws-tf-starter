@@ -2,6 +2,9 @@
 
 Create an AWS EC2 instance with attached GPU using Terraform and Cloud-Init
 
+## State Bucket Setup
+
+```bash
 export REGION="eu-central-1"
 export STATE_BUCKET="buildstar-terraform-state"
 
@@ -17,7 +20,9 @@ aws dynamodb create-table --table-name Terraform-backend-lock \
   --attribute-definitions AttributeName=LockID,AttributeType=S \
   --key-schema AttributeName=LockID,KeyType=HASH \
   --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5
+```
 
+## Run Terraform
 
 ```bash
 export AWS_ACCESS_KEY_ID=""

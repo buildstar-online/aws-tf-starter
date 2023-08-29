@@ -30,8 +30,8 @@ ingress_rules = ["http-80-tcp",
 ]
 
 # EC2 Options
-ec2_instance_type = "g5.xlarge"
-max_spot_price    = 0.40
+ec2_instance_type = "g4dn.xlarge"
+max_spot_price    = 0.25
 spot_type         = "persistent"
 
 # Main Drive

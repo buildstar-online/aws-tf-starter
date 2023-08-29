@@ -2,6 +2,23 @@
 
 Create an AWS EC2 instance with attached GPU using Terraform and Cloud-Init
 
+export REGION="eu-central-1"
+export STATE_BUCKET="buildstar-terraform-state"
+
+aws s3api create-bucket --bucket $STATE_BUCKET \
+  --region $REGION \
+  --create-bucket-configuration \
+  LocationConstraint=$REGION
+
+aws s3api put-bucket-encryption --bucket $STATE_BUCKET \
+  --server-side-encryption-configuration "{\"Rules\": [{\"ApplyServerSideEncryptionByDefault\":{\"SSEAlgorithm\": \"AES256\"}}]}"
+
+aws dynamodb create-table --table-name Terraform-backend-lock \
+  --attribute-definitions AttributeName=LockID,AttributeType=S \
+  --key-schema AttributeName=LockID,KeyType=HASH \
+  --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5
+
+
 ```bash
 export AWS_ACCESS_KEY_ID=""
 export AWS_SECRET_ACCESS_KEY=""

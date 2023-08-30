@@ -18,6 +18,7 @@ dhcp_options_domain_name = "lan"
 # full list of rules here: https://github.com/terraform-aws-modules/terraform-aws-security-group/blob/master/rules.tf
 ingress_rules = ["http-80-tcp",
   "https-443-tcp",
+  "http-8080-tcp",
   "all-icmp",
   "ssh-tcp",
   "grafana-tcp",

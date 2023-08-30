@@ -77,25 +77,29 @@ data "aws_ami" "ubuntu" {
 # EC2 Spot Instance
 module "ec2_instance" {
   source  = "terraform-aws-modules/ec2-instance/aws"
-  version = "~> 3.0"
 
   name = local.name
 
   create_spot_instance        = true
   spot_price                  = var.max_spot_price
   spot_type                   = var.spot_type
+
   spot_wait_for_fulfillment   = true
   ami                         = data.aws_ami.ubuntu.id
+  
   instance_type               = var.ec2_instance_type
   monitoring                  = true
   vpc_security_group_ids      = [module.security_group.security_group_id]
   subnet_id                   = element(module.vpc.public_subnets, 0)
+  
   associate_public_ip_address = true
   user_data                   = file("user-data.yaml")
   #user_data_replace_on_change = true
   availability_zone           = var.project_azs[0]
   ebs_optimized               = true
 
+  spot_launch_group                = null
+  spot_block_duration_minutes      = null
 
   root_block_device = [
     {

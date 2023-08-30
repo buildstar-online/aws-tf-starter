@@ -51,8 +51,8 @@ jobs:
           -e "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" \
           -e "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
           -v $(pwd):/terraform -w /terraform \
-          -var="vm_sku=$VM_SKU" \
-          -var="max_bid_price=$MAX_BID" \
+          -var="ec2_instance_type=$VM_SKU" \
+          -var="max_spot_price=$MAX_BID" \
           hashicorp/terraform plan
       continue-on-error: false
       shell: bash
@@ -68,8 +68,8 @@ jobs:
           -e "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
           -v $(pwd):/terraform -w /terraform \
           hashicorp/terraform apply \
-          -var="vm_sku=$VM_SKU" \
-          -var="max_bid_price=$MAX_BID" \
+          -var="ec2_instance_type=$VM_SKU" \
+          -var="max_spot_price=$MAX_BID" \
           -no-color -auto-approve -input=false
       continue-on-error: false
       shell: bash

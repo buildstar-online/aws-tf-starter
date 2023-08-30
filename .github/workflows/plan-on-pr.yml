@@ -6,7 +6,7 @@ permissions:
   pull-requests: write
 
 jobs:
-  terraform-pr:
+  terraform:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -37,7 +37,7 @@ jobs:
           hashicorp/terraform validate -no-color
       continue-on-error: false
       shell: bash
-    
+
     - name: Terraform Plan
       id: plan
       run: |
@@ -45,10 +45,14 @@ jobs:
           -e "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" \
           -e "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
           -v $(pwd):/terraform -w /terraform \
-          hashicorp/terraform plan \
-          -var="hcloud_token=${{ secrets.HCLOUD_TOKEN }}" \
-          -no-color -lock=false -out terraform.plan
-      continue-on-error: true
+          -var="ec2_instance_type=$VM_SKU" \
+          -var="max_spot_price=$MAX_BID" \
+          hashicorp/terraform plan
+      continue-on-error: false
+      shell: bash
+      env:
+        VM_SKU: ${{ github.event.inputs.vm_sku }}
+        MAX_BID: ${{ github.event.inputs.max_bid }}
 
     # generate plain output
     - run: |

@@ -32,7 +32,7 @@ ingress_rules = ["http-80-tcp",
 # EC2 Options
 ec2_instance_type = "t3.large"
 max_spot_price    = 0.20
-spot_type         = "persistent"
+spot_type         = "one-time"
 
 # Main Drive
 rbs_size      = 50

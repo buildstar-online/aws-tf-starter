@@ -1,0 +1,41 @@
+# The GitHub Actions docs (https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#on)
+# describe other options for 'on', 'pull_request' is a good default.
+name: Infracost
+on: 
+  pull_request:
+  workflow_dispatch:
+env:
+  # If you use private modules you'll need this env variable to use
+  # the same ssh-agent socket value across all jobs & steps.
+  SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+jobs:
+  infracost:
+    name: Infracost
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    env:
+      TF_ROOT: .
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Infracost
+        uses: infracost/actions/setup@v2
+        # See https://github.com/infracost/actions/tree/master/setup for other inputs
+        # If you can't use this action, see Docker images in https://infracost.io/cicd
+        with:
+          api-key: ${{ secrets.INFRACOST_API_KEY }}
+
+      # Generate Infracost JSON file as the baseline.
+      - name: Generate Infracost diff
+        run: |
+          infracost breakdown --path=${TF_ROOT} \
+                          --show-skipped \
+                          --sync-usage-file \
+                          --usage-file=infracost-usage.yaml \
+                          --terraform-var organization='${{ secrets.ORGANIZATION }}' \
+                          --terraform-var organization_id='${{ secrets.ORGANIZATION_ID }}' \
+                          --terraform-var billing_account='${{ secrets.BILLING_ACCOUNT }}' \
+        shell: bash
+        env:
+            INFRACOST_CURRENCY: "EUR"

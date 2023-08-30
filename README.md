@@ -24,11 +24,33 @@ aws dynamodb create-table --table-name Terraform-backend-lock \
 
 ## IAM Setup
 
+### Roles
 ```bash
-aws iam create-policy --policy-name Terraform-Backend-Policy \
-  --policy-document file://policy.json
+aws iam create-policy --policy-name Terraform-Backend-Policy-S3 \
+  --policy-document file://s3-policy.json
+
+aws iam create-policy --policy-name Terraform-Backend-Policy-DynamoDB \
+  --policy-document file://dynamo-policy.json
+```
+
+### User
+
+```bash
+export ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
+
+aws iam create-user --user-name terraform
+
+aws iam create-access-key --user-name terraform
+
+aws iam attach-user-policy --policy-arn arn:aws:iam::$ACCOUNT_ID:policy/Terraform-Backend-Policy-S3  \
+  --user-name terraform
+
+aws iam attach-user-policy --policy-arn arn:aws:iam::$ACCOUNT_ID:policy/Terraform-Backend-Policy-DynamoDB  \
+  --user-name terraform
 
 ```
+
+
 ## Run Terraform
 
 ```bash

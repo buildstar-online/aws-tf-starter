@@ -1,18 +1,17 @@
 #cloud-config
-hostname: smol-metal
+hostname: virtual-bradley
+fqdn: virtual-bradley
 disable_root: false
 network:
   config: disabled
 users:
-  - name: friend
-    groups: users, admin, docker, sudo, kvm
+  - name: max
+    groups: users, admin, docker, sudo
     sudo: ALL=(ALL) NOPASSWD:ALL
     shell: /bin/bash
-    lock_passwd: true
+    lock_passwd: false
     ssh_import_id:
       - gh:cloudymax
-    ssh_authorized_keys:
-      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC3xEankn5zUklqZ5XVRbjP9XrXmK49VZ4OJqkzRF5JJpolBAwmJIUoww6G51g9IlYWzzijtfRSsQxoZHmHp+sSz/qP5zbjoFVCJ08N0ulqb8okM5C7+uET3dZKxwMT6DLFKSLebYnFlCtbp6VnDvp6gP+ZIesL6cxVWC/fSjTbyesEaNWkigI+2zF3sSDOvrSGvRmQSOfOvdjAY8xvcKkwj4uSXa5qsVM7OX+j+2vARredbvya6YyAkumB9SXVHqnFdOOo1jgMtdNGFPi703dgAnfQp7yafR9Ext46pkO8zcyroysogKjI0HqLqUtV6tAG7NZo4+u8k9uYkZmQa26u2rmkx6kUP1jaDfrSp/33dcCLRVKd/FOiv5Ztwvl71fKh3az9khf/ZxFO2thDy8M0TY46TWs87eow8McNmOJWvsyuvVsI7ZyRhGWQkx7V0vpsd8ClDf91enKt4tBDlTu8PYvI2i2UMCeFb+uSt4c2D/kjTCM/+XPrljLupIfs7pM= max
 package_update: true
 package_upgrade: true
 packages: 
@@ -35,17 +34,21 @@ packages:
   - open-iscsi
   - nfs-common
   - ncdu
+  - nvtop
+  - linux-headers-generic
+  - gcc
+  - kmod
+  - make
+  - pkg-config
+  - libvulkan1
 runcmd:
-  #####################
-  # Import SSH keys
-  - sudo -u friend ssh-import-id-gh cloudymax  
-  - sudo -u friend ssh-import-id-gh jessebot
   ######################
   # Install YQ
   - wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq &&\
   - chmod +x /usr/bin/yq
   ######################
   # Install Docker
+  - sudo chown -R friend:friend /home/friend
   - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
   - echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
   - sudo apt-get update 
@@ -63,13 +66,27 @@ runcmd:
   - sudo -u friend NONINTERACTIVE=1 /bin/bash /install.sh
   - sudo -u friend /home/linuxbrew/.linuxbrew/bin/brew shellenv >> /home/friend/.profile
   - sudo -u friend /home/linuxbrew/.linuxbrew/opt/python@3.11/libexec/bin >> /home/friend/.profile
-  - sudo -u friend /home/linuxbrew/.linuxbrew/bin/brew install python@3.11 bitwarden-cli b2-tools k9s neovim
+  - sudo -u friend /home/linuxbrew/.linuxbrew/bin/brew install python@3.11 k9s neovim helm
   - sudo -u friend /home/linuxbrew/.linuxbrew/bin/pip3.11 install smol-k8s-lab onboardme
   - sudo mkdir -p /home/friend/.config/smol-ka8s-lab
   - sudo chown -R friend:friend /home/linuxbrew
   - sudo chown -R friend:friend /home/friend
+  #######################
+  # Prometheus
+  - wget -O /opt/node_exporter-1.6.1.linux-amd64.tar.gz https://github.com/prometheus/node_exporter/releases/download/v1.6.1/node_exporter-1.6.1.linux-amd64.tar.gz
+  - tar -xvf /opt/node_exporter-1.6.1.linux-amd64.tar.gz -C /opt
+  - rm /opt/node_exporter-1.6.1.linux-amd64.tar.gz
+  - ln -s node_exporter-1.6.1.linux-amd64 /opt/node_exporter
+  - wget https://raw.githubusercontent.com/small-hack/smol-metal/main/node-exporter.service
+  - sudo mv node-exporter.service /etc/systemd/system/node-exporter.service
   ########################
   # Start system services
   - systemctl daemon-reload
+  - systemctl enable node-exporter
+  - systemctl restart node-exporter
   - sudo systemctl enable fail2ban
   - sudo systemctl start fail2ban
+  ########################
+  # Nvidia driver
+  - wget curl https://raw.githubusercontent.com/GoogleCloudPlatform/compute-gpu-installation/main/linux/install_gpu_driver.py -O install_gpu_driver.py
+  - python3 install_gpu_driver.py

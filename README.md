@@ -121,20 +121,19 @@ I strongly advise using the [Terraform-AWS-Modules](https://github.com/terraform
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~>4.34.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~>5.14.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | ~>4.34.0 |
-| <a name="provider_random"></a> [random](#provider\_random) | n/a |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | ~>5.14.0 |
 
 ## Modules
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_ec2_instance"></a> [ec2\_instance](#module\_ec2\_instance) | terraform-aws-modules/ec2-instance/aws | ~> 3.0 |
+| <a name="module_ec2_instance"></a> [ec2\_instance](#module\_ec2\_instance) | terraform-aws-modules/ec2-instance/aws | n/a |
 | <a name="module_security_group"></a> [security\_group](#module\_security\_group) | terraform-aws-modules/security-group/aws | n/a |
 | <a name="module_vpc"></a> [vpc](#module\_vpc) | terraform-aws-modules/vpc/aws | n/a |
 
@@ -142,7 +141,6 @@ I strongly advise using the [Terraform-AWS-Modules](https://github.com/terraform
 
 | Name | Type |
 |------|------|
-| [random_password.master](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password) | resource |
 | [aws_ami.ubuntu](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ami) | data source |
 | [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
 
@@ -152,10 +150,6 @@ I strongly advise using the [Terraform-AWS-Modules](https://github.com/terraform
 |------|-------------|------|---------|:--------:|
 | <a name="input_database_subnets"></a> [database\_subnets](#input\_database\_subnets) | n/a | `list(string)` | n/a | yes |
 | <a name="input_dhcp_options_domain_name"></a> [dhcp\_options\_domain\_name](#input\_dhcp\_options\_domain\_name) | n/a | `string` | n/a | yes |
-| <a name="input_ebs_az"></a> [ebs\_az](#input\_ebs\_az) | n/a | `string` | n/a | yes |
-| <a name="input_ebs_encrypted"></a> [ebs\_encrypted](#input\_ebs\_encrypted) | n/a | `string` | n/a | yes |
-| <a name="input_ebs_size"></a> [ebs\_size](#input\_ebs\_size) | n/a | `number` | n/a | yes |
-| <a name="input_ebs_type"></a> [ebs\_type](#input\_ebs\_type) | n/a | `string` | n/a | yes |
 | <a name="input_ec2_instance_type"></a> [ec2\_instance\_type](#input\_ec2\_instance\_type) | n/a | `string` | n/a | yes |
 | <a name="input_environment_name"></a> [environment\_name](#input\_environment\_name) | n/a | `string` | n/a | yes |
 | <a name="input_ingress_rules"></a> [ingress\_rules](#input\_ingress\_rules) | n/a | `list(string)` | n/a | yes |

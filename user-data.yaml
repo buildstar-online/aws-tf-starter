@@ -1,6 +1,6 @@
 #cloud-config
-hostname: virtual-bradley
-fqdn: virtual-bradley
+hostname: aws-bradley
+fqdn: aws-bradley
 disable_root: false
 network:
   config: disabled
@@ -12,6 +12,11 @@ users:
     lock_passwd: false
     ssh_import_id:
       - gh:cloudymax
+bootcmd:
+ - test -z "$(blkid /dev/nvme1n1)" && mkfs -t ext4 -L data /dev/nvme1n1
+ - mkdir -p /data
+mounts:
+ - [ "/dev/nvme1n1", "/data", "ext4", "defaults,nofail", "0", "2" ]
 package_update: true
 package_upgrade: true
 packages: 

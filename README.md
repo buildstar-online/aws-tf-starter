@@ -1,5 +1,5 @@
 <h1 align="center">
-  AWS Starter Project
+  AWS Starter-Project
 </h1>
 
 <p align="center">

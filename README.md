@@ -1,67 +1,119 @@
-# AWS EC2 GPU Instances
+<h1 align="center">
+  AWS Starter Project
+</h1>
 
-Create an AWS EC2 instance with attached GPU using Terraform and Cloud-Init
+<p align="center">
+  <img width="64" src="https://icons-for-free.com/iconfiles/png/512/amazon+aws-1331550885897517282.png">
+  <img width="64" src="https://icons-for-free.com/iconfiles/png/512/terraform-1331550893634583795.png">
+<p>
 
-## State Bucket Setup
+<p align="center">
+Create and manage AWS resources using Terraform and Github Actions
+</p>
+<br>
 
-```bash
-export REGION="eu-central-1"
-export STATE_BUCKET="buildstar-terraform-state"
+## Prerequisites
 
-aws s3api create-bucket --bucket $STATE_BUCKET \
-  --region $REGION \
-  --create-bucket-configuration \
-  LocationConstraint=$REGION
+1. An AWS account
 
-aws s3api put-bucket-encryption --bucket $STATE_BUCKET \
-  --server-side-encryption-configuration "{\"Rules\": [{\"ApplyServerSideEncryptionByDefault\":{\"SSEAlgorithm\": \"AES256\"}}]}"
+   This project uses non-free resources. You will need to sign up for an AWS account, verify your identity as well as provide a payment method. One of the benefits of automating your cloud projects with Terraform is the ease with which you may re-create and destroy cloud resources. Make use of this festure to `turn off` your project when it is not in use.
 
-aws dynamodb create-table --table-name Terraform-backend-lock \
-  --attribute-definitions AttributeName=LockID,AttributeType=S \
-  --key-schema AttributeName=LockID,KeyType=HASH \
-  --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5
-```
+   - [Sign up for AWS](https://aws.amazon.com/)
 
-## IAM Setup
+2. AWS CLI
+   
+   You will need the AWS cli tool to authenticate your innitial account as well as create some base resources and permissions that will allow terraform to control your project.
+   - [Installing the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
+   - or use the docker container `docker pull amazon/aws-cli:latest`
 
-### Roles
-```bash
-aws iam create-policy --policy-name Terraform-Backend-Policy-S3 \
-  --policy-document file://s3-policy.json
+3. Terraform
 
-aws iam create-policy --policy-name Terraform-Backend-Policy-DynamoDB \
-  --policy-document file://dynamo-policy.json
-```
+   You will need terraform to manage all of the terraform (obviously). Be aware that terraform doesn't have ARM64 support yet so M1/M2 mac users will need to use the docker version of the cli with the `--platform linux/amd64` flag.
+   - [Installing Terraform](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli)
+   - [Dockerhub images](https://hub.docker.com/r/hashicorp/terraform/)
 
-### User
+4. Resource Quotas (Optional)
 
-```bash
-export ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
+   AWS as well as most other cloud providers make use of `Quotas` to limit the amount of resources customers can create. This prevents abuse of their `free-tier` as well as stops customer from accidentially letting autoscaling generate massive bills. If you plan on deploying GPU/TPU accelerators or more than a couple VMs, you will need to request a quota increase for those resources. See below for more information.
 
-aws iam create-user --user-name terraform
+   - [How to request a quota increase on AWS](https://docs.aws.amazon.com/servicequotas/latest/userguide/request-quota-increase.html)
 
-aws iam create-access-key --user-name terraform
+5. Infracost (Optional)
 
-aws iam attach-user-policy --policy-arn arn:aws:iam::$ACCOUNT_ID:policy/Terraform-Backend-Policy-S3  \
-  --user-name terraform
+   Infracost shows cloud cost estimates for Terraform. It lets engineers see a cost breakdown and understand costs before making changes, either in the terminal, VS Code or pull requests.
+   
+   - [Infracost Quickstart Guide](https://www.infracost.io/docs/#quick-start)
+   - [Run Infracost automatically in your Github Actions Workflows](https://github.com/infracost/actions)
+   - [Check out the project out on Github](https://github.com/infracost/infracost)
 
-aws iam attach-user-policy --policy-arn arn:aws:iam::$ACCOUNT_ID:policy/Terraform-Backend-Policy-DynamoDB  \
-  --user-name terraform
+### Modules in use:
 
-```
+I strongly advise using the [Terraform-AWS-Modules](https://github.com/terraform-aws-modules) community project's modules:
 
+- [aws-ec2-instance](https://github.com/terraform-aws-modules/terraform-aws-ec2-instance)
+- [aws-vpc](https://github.com/terraform-aws-modules/terraform-aws-vpc)
+- [aws-security-group](https://github.com/terraform-aws-modules/terraform-aws-security-group)
 
-## Run Terraform
+## Get Started
 
-```bash
-export AWS_ACCESS_KEY_ID=""
-export AWS_SECRET_ACCESS_KEY=""
+1. Create the Terraform state bucket
 
-docker run --platform linux/amd64 \
-  -e "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" \
-  -e "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" \
-  -v $(pwd):/terraform -w /terraform hashicorp/terraform init -upgrade
-```
+  ```bash
+  export REGION="eu-central-1"
+  export STATE_BUCKET="buildstar-terraform-state"
+
+  aws s3api create-bucket --bucket $STATE_BUCKET \
+    --region $REGION \
+    --create-bucket-configuration \
+    LocationConstraint=$REGION
+
+  aws s3api put-bucket-encryption --bucket $STATE_BUCKET \
+    --server-side-encryption-configuration "{\"Rules\": [{\"ApplyServerSideEncryptionByDefault \":{\"SSEAlgorithm\": \"AES256\"}}]}"
+
+  aws dynamodb create-table --table-name Terraform-backend-lock \
+    --attribute-definitions AttributeName=LockID,AttributeType=S \
+    --key-schema AttributeName=LockID,KeyType=HASH \
+    --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5
+  ```
+
+2. Create IAM Roles
+  
+  ```bash
+  aws iam create-policy --policy-name Terraform-Backend-Policy-S3 \
+    --policy-document file://s3-policy.json
+
+  aws iam create-policy --policy-name Terraform-Backend-Policy-DynamoDB \
+    --policy-document file://dynamo-policy.json
+  ```
+
+3. Create an IAM User
+
+  ```bash
+  export ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
+
+  aws iam create-user --user-name terraform
+
+  aws iam create-access-key --user-name terraform
+
+  aws iam attach-user-policy --policy-arn arn:aws:iam::$ACCOUNT_ID:policy/Terraform-Backend-Policy-S3  \
+    --user-name terraform
+
+  aws iam attach-user-policy --policy-arn arn:aws:iam::$ACCOUNT_ID:policy/Terraform-Backend-Policy-DynamoDB  \
+    --user-name terraform
+
+  ```
+
+4. Initialize Terraform
+
+  ```bash
+  export AWS_ACCESS_KEY_ID=""
+  export AWS_SECRET_ACCESS_KEY=""
+
+  docker run --platform linux/amd64 \
+    -e "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" \
+    -e "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" \
+    -v $(pwd):/terraform -w /terraform hashicorp/terraform init -upgrade
+  ```
 
 
 <!-- BEGIN_TF_DOCS -->

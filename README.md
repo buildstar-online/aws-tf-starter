@@ -46,14 +46,6 @@ Create and manage AWS resources using Terraform and Github Actions
    - [Run Infracost automatically in your Github Actions Workflows](https://github.com/infracost/actions)
    - [Check out the project out on Github](https://github.com/infracost/infracost)
 
-### Modules in use:
-
-I strongly advise using the [Terraform-AWS-Modules](https://github.com/terraform-aws-modules) community project's modules:
-
-- [aws-ec2-instance](https://github.com/terraform-aws-modules/terraform-aws-ec2-instance)
-- [aws-vpc](https://github.com/terraform-aws-modules/terraform-aws-vpc)
-- [aws-security-group](https://github.com/terraform-aws-modules/terraform-aws-security-group)
-
 ## Get Started
 
 1. Create the Terraform state bucket

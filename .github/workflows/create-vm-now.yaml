@@ -1,15 +1,15 @@
-name: Run Terraform
+name: Create VM now
 on: 
   workflow_dispatch:
     inputs:
       vm_sku:
         description: 'Virtual Machine SKU'
         required: true
-        default: 't3.xlarge'
+        default: 'g5.2xlarge'
       max_bid:
         description: 'Maximum spot bid amount'
         required: true
-        default: '0.24'
+        default: '0.60'
 
 jobs:
   terraform:

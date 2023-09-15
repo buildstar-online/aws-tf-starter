@@ -6,11 +6,6 @@ locals {
   current_identity = data.aws_caller_identity.current.arn
 }
 
-# Random Password Creation for VM and RDS
-resource "random_password" "master" {
-  length = 10
-}
-
 # Virtual Private Cloud for isolation
 module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
@@ -94,7 +89,7 @@ module "ec2_instance" {
   
   associate_public_ip_address = true
   user_data                   = file("user-data.yaml")
-  #user_data_replace_on_change = true
+  user_data_replace_on_change = true
   availability_zone           = var.project_azs[0]
   ebs_optimized               = true
 

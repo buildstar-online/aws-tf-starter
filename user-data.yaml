@@ -46,7 +46,14 @@ packages:
   - make
   - pkg-config
   - libvulkan1
+  - rsync
 runcmd:
+  - mkdir -p /data/var
+  - mkdir -p /data/usr
+  - rsync -avz /var/ /data/var
+  - rsync -avz /usr/ /data/usr
+  - mount /data/var /var
+  - mount /data/usr /usr
   ######################
   # Install YQ
   - wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq &&\

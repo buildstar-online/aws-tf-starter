@@ -50,62 +50,61 @@ Create and manage AWS resources using Terraform and Github Actions
 
 1. Create the Terraform state bucket
 
-  ```bash
-  export REGION="eu-central-1"
-  export STATE_BUCKET="buildstar-terraform-state"
+    ```bash
+    export REGION="eu-central-1"
+    export STATE_BUCKET="buildstar-terraform-state"
 
-  aws s3api create-bucket --bucket $STATE_BUCKET \
-    --region $REGION \
-    --create-bucket-configuration \
-    LocationConstraint=$REGION
+    aws s3api create-bucket --bucket $STATE_BUCKET \
+      --region $REGION \
+      --create-bucket-configuration \
+      LocationConstraint=$REGION
 
-  aws s3api put-bucket-encryption --bucket $STATE_BUCKET \
-    --server-side-encryption-configuration "{\"Rules\": [{\"ApplyServerSideEncryptionByDefault \":{\"SSEAlgorithm\": \"AES256\"}}]}"
+    aws s3api put-bucket-encryption --bucket $STATE_BUCKET \
+      --server-side-encryption-configuration "{\"Rules\": [{\"ApplyServerSideEncryptionByDefault \":{\"SSEAlgorithm\": \"AES256\"}}]}"
 
-  aws dynamodb create-table --table-name Terraform-backend-lock \
-    --attribute-definitions AttributeName=LockID,AttributeType=S \
-    --key-schema AttributeName=LockID,KeyType=HASH \
-    --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5
-  ```
+    aws dynamodb create-table --table-name Terraform-backend-lock \
+      --attribute-definitions AttributeName=LockID,AttributeType=S \
+      --key-schema AttributeName=LockID,KeyType=HASH \
+      --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5
+    ```
 
 2. Create IAM Roles
   
-  ```bash
-  aws iam create-policy --policy-name Terraform-Backend-Policy-S3 \
-    --policy-document file://s3-policy.json
+    ```bash
+    aws iam create-policy --policy-name Terraform-Backend-Policy-S3 \
+      --policy-document file://s3-policy.json
 
-  aws iam create-policy --policy-name Terraform-Backend-Policy-DynamoDB \
-    --policy-document file://dynamo-policy.json
-  ```
+    aws iam create-policy --policy-name Terraform-Backend-Policy-DynamoDB \
+      --policy-document file://dynamo-policy.json
+    ```
 
 3. Create an IAM User
 
-  ```bash
-  export ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
+    ```bash
+    export ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
 
-  aws iam create-user --user-name terraform
+    aws iam create-user --user-name terraform
 
-  aws iam create-access-key --user-name terraform
+    aws iam create-access-key --user-name terraform
 
-  aws iam attach-user-policy --policy-arn arn:aws:iam::$ACCOUNT_ID:policy/Terraform-Backend-Policy-S3  \
-    --user-name terraform
+    aws iam attach-user-policy --policy-arn arn:aws:iam::$ACCOUNT_ID:policy/Terraform-Backend-Policy-S3  \
+      --user-name terraform
 
-  aws iam attach-user-policy --policy-arn arn:aws:iam::$ACCOUNT_ID:policy/Terraform-Backend-Policy-DynamoDB  \
-    --user-name terraform
-
-  ```
+    aws iam attach-user-policy --policy-arn arn:aws:iam::$ACCOUNT_ID:policy/Terraform-Backend-Policy-DynamoDB  \
+      --user-name terraform
+    ```
 
 4. Initialize Terraform
 
-  ```bash
-  export AWS_ACCESS_KEY_ID=""
-  export AWS_SECRET_ACCESS_KEY=""
+    ```bash
+    export AWS_ACCESS_KEY_ID=""
+    export AWS_SECRET_ACCESS_KEY=""
 
-  docker run --platform linux/amd64 \
-    -e "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" \
-    -e "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" \
-    -v $(pwd):/terraform -w /terraform hashicorp/terraform init -upgrade
-  ```
+    docker run --platform linux/amd64 \
+      -e "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" \
+      -e "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" \
+      -v $(pwd):/terraform -w /terraform hashicorp/terraform init -upgrade
+    ```
 
 
 <!-- BEGIN_TF_DOCS -->

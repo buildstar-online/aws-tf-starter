@@ -101,17 +101,6 @@ module "ec2_instance" {
   spot_launch_group                = null
   spot_block_duration_minutes      = null
 
-  root_block_device = [
-    {
-      device_name           = "/dev/sda"
-      delete_on_termination = false
-      encrypted             = var.rbs_encrypted
-      volume_type           = var.rbs_type
-      iops                  = var.rbs_iops
-      volume_size           = var.rbs_size
-    }
-  ]
-
   tags = {
     Terraform   = "true"
     Environment = "${var.environment_name}"

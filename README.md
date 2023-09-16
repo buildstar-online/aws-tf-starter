@@ -12,6 +12,8 @@ Create and manage AWS resources using Terraform and Github Actions
 </p>
 <br>
 
+TODO: customize the user-data files to use gaming drivers as well: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/install-nvidia-driver.html#nvidia-gaming-driver
+
 ## Prerequisites
 
 1. An AWS account

@@ -24,7 +24,7 @@ on:
         default: ''
 
 jobs:
-  terraform:
+  create-vm-now:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3

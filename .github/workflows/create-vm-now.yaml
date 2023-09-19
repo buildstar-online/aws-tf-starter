@@ -10,6 +10,10 @@ on:
         description: 'Maximum spot bid amount'
         required: true
         default: '0.60'
+      cloud-init-template:
+        description: 'Cloud-Init template'
+        required: true
+        default: 'user-data.yaml'
 
 jobs:
   terraform:

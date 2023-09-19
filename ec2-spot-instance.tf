@@ -23,8 +23,8 @@ data template_file "this" {
     USERNAME               = var.username
     GITHUB_USERNAME        = var.github_username
     AWS_ACCESS_KEY_ID      = var.aws_access_key_id 
-    aws_secret_access_key  = var.aws_secret_access_key
-    region                 = var.region
+    AWS_SECRET_ACCESS_KEY  = var.aws_secret_access_key
+    REGION                 = var.region
   }
 }
 

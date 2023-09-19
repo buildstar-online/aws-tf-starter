@@ -22,22 +22,6 @@ variable "project_azs" {
   type = list(string)
 }
 
-variable "rbs_size" {
-  type = number
-}
-
-variable "rbs_type" {
-  type = string
-}
-
-variable "rbs_encrypted" {
-  type = string
-}
-
-variable "rbs_iops" {
-  type = number
-}
-
 variable "ingress_rules" {
   type = list(string)
 }

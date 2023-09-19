@@ -47,7 +47,7 @@ jobs:
           -e "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" \
           -e "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
           -v $(pwd):/terraform -w /terraform \
-          hashicorp/terraform terraform force-unlock $LOCK_ID
+          hashicorp/terraform force-unlock $LOCK_ID
       continue-on-error: false
       shell: bash
       env:

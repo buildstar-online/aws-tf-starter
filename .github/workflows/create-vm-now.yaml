@@ -69,7 +69,7 @@ jobs:
           -var="username=${{ github.event.inputs.vm_username }}" \
           -var="github_username=${{ github.event.inputs.github_username }}" \
           -var="aws_access_key_id=${{ secrets.AWS_ACCESS_KEY_ID }}" \ 
-          -var="aws_secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+          -var="aws_secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
           hashicorp/terraform plan
       continue-on-error: false
       shell: bash
@@ -86,9 +86,9 @@ jobs:
           -var="max_spot_price=$MAX_BID" \
           -var="cloud-init-template=${{ github.event.inputs.cloud-init-template }}" \
           -var="username=${{ github.event.inputs.vm_username }}" \
-          -var="github_username=${{ github.event.inputs.github_username }}"" \
+          -var="github_username=${{ github.event.inputs.github_username }}" \
           -var="aws_access_key_id=${{ secrets.AWS_ACCESS_KEY_ID }}" \ 
-          -var="aws_secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+          -var="aws_secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
           -no-color -auto-approve -input=false
       continue-on-error: false
       shell: bash

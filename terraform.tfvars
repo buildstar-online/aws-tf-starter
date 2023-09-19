@@ -35,5 +35,6 @@ ec2_instance_type   = "g5.2xlarge"
 max_spot_price      = 0.60
 spot_type           = "one-time"
 username            = "friend"
+hostname            = "ec2spot"
 github_username     = "cloudymax"
 cloud-init-template = "user-data.yaml"

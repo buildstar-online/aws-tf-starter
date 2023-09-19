@@ -69,6 +69,17 @@ data "aws_ami" "ubuntu" {
   owners = ["099720109477"] # Canonical
 }
 
+// add the tunnel token to the cloud-init userdata
+data template_file "this" {
+  template = file("./user-data.yaml")
+
+  vars = {
+    hostname               = var.hostname
+    username               = var.username
+    github_username        = var.github_username
+  }
+}
+
 # EC2 Spot Instance
 module "ec2_instance" {
   source  = "terraform-aws-modules/ec2-instance/aws"
@@ -88,7 +99,7 @@ module "ec2_instance" {
   subnet_id                   = element(module.vpc.public_subnets, 0)
   
   associate_public_ip_address = true
-  user_data                   = file("user-data.yaml")
+  user_data                   = "${data.template_file.this.rendered}"
   user_data_replace_on_change = true
   availability_zone           = var.project_azs[0]
   ebs_optimized               = true

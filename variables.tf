@@ -63,5 +63,20 @@ variable "dhcp_options_domain_name" {
 }
 
 variable "environment_name" {
+  type    = string
+  default = "test"
+}
+
+variable "hostname" {
+  type    = string
+  default = "ec2spot"
+}
+
+variable "username" {
+  type    = string
+  default = "admin" 
+}
+
+variable "github_username" {
   type = string
 }

@@ -22,6 +22,9 @@ data template_file "this" {
     hostname               = var.hostname
     username               = var.username
     github_username        = var.github_username
+    aws_access_key_id      = var.aws_access_key_id 
+    aws_secret_access_key  = var.aws_secret_access_key
+    region                 = var.region
   }
 }
 

@@ -19,10 +19,10 @@ data template_file "this" {
   template = file("./user-data.yaml")
 
   vars = {
-    hostname               = var.hostname
-    username               = var.username
-    github_username        = var.github_username
-    aws_access_key_id      = var.aws_access_key_id 
+    HOSTNAME               = var.hostname
+    USERNAME               = var.username
+    GITHUB_USERNAME        = var.github_username
+    AWS_ACCESS_KEY_ID      = var.aws_access_key_id 
     aws_secret_access_key  = var.aws_secret_access_key
     region                 = var.region
   }

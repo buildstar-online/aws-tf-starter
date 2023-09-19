@@ -68,8 +68,8 @@ jobs:
           -var="cloud-init-template=$CLOUD_INIT" \
           -var="username=$VM_USERNAME" \
           -var="github_username=$GH_USERNAME" \
-          -var="aws_access_key_id=$AWS_ACCESS_KEY_ID" \ 
-          -var="aws_secret_access_key=$AWS_SECRET_ACCESS_KEY" \
+          -var="aws_access_key_id=${{ secrets.AWS_ACCESS_KEY_ID }}" \ 
+          -var="aws_secret_access_key=${{ secrets.AWS_ACCESS_KEY_ID }}" \
           hashicorp/terraform plan
       continue-on-error: false
       shell: bash

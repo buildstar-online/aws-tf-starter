@@ -84,11 +84,13 @@ variable "github_username" {
 variable "aws_secret_access_key" {
   type = string
   sensitive = true
+  default = "null"
 }
 
 variable "aws_access_key_id" {
   type = string
   sensitive = true
+  default = "null"
 }
 
 

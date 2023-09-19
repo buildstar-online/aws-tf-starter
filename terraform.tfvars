@@ -31,12 +31,9 @@ ingress_rules = ["http-80-tcp",
 ]
 
 # EC2 Options
-ec2_instance_type = "t3.large"
-max_spot_price    = 0.20
-spot_type         = "one-time"
-
-# Main Drive
-rbs_size      = 50
-rbs_type      = "io1"
-rbs_encrypted = false
-rbs_iops      = 2500
+ec2_instance_type   = "g5.2xlarge"
+max_spot_price      = 0.60
+spot_type           = "one-time"
+username            = "friend"
+github_username     = "cloudymax"
+cloud-init-template = "user-data.yaml"

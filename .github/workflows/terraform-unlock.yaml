@@ -2,7 +2,7 @@ name: Terraform Unlock
 on: 
   workflow_dispatch:
     inputs:
-      lock-_d:
+      lock_id:
         description: 'Terraform Lock ID'
         required: true
         default: ''

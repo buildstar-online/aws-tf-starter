@@ -77,4 +77,9 @@ variable "aws_access_key_id" {
   default = "null"
 }
 
+variable "cloud-init-template" {
+  type = string
+  default = "user-data.yaml"
+}
+
 

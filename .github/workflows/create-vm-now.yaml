@@ -65,17 +65,20 @@ jobs:
           -v $(pwd):/terraform -w /terraform \
           -var="ec2_instance_type=$VM_SKU" \
           -var="max_spot_price=$MAX_BID" \
-          -var="cloud-init-template=${{ github.event.inputs.cloud-init-template }}" \
-          -var="username=${{ github.event.inputs.vm_username }}" \
-          -var="github_username=${{ github.event.inputs.github_username }}" \
-          -var="aws_access_key_id=$AWS_ACCESS_KEY_ID" \ 
-          -var="aws_secret_access_key=$AWS_ACCESS_KEY_ID" \
+          -var="cloud-init-template=$CLOUD_INIT" \
+          -var="username=$VM_USERNAME" \
+          -var="github_username=$GH_USERNAME" \
+          -var="aws_access_key_id=${{ secrets.AWS_ACCESS_KEY_ID }}" \ 
+          -var="aws_secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
           hashicorp/terraform plan
       continue-on-error: false
       shell: bash
       env:
         VM_SKU: ${{ github.event.inputs.vm_sku }}
         MAX_BID: ${{ github.event.inputs.max_bid }}
+        CLOUD_INIT: ${{ github.event.inputs.cloud-init-template }}
+        VM_USERNAME: ${{ github.event.inputs.vm_username }}
+        GH_USERNAME: ${{ github.event.inputs.github_username }}
 
     - name: Terraform Apply
       id: apply
@@ -87,9 +90,9 @@ jobs:
           hashicorp/terraform apply \
           -var="ec2_instance_type=$VM_SKU" \
           -var="max_spot_price=$MAX_BID" \
-          -var="cloud-init-template=${{ github.event.inputs.cloud-init-template }}" \
-          -var="username=${{ github.event.inputs.vm_username }}" \
-          -var="github_username=${{ github.event.inputs.github_username }}" \
+          -var="cloud-init-template=$CLOUD_INIT" \
+          -var="username=$VM_USERNAME" \
+          -var="github_username=$GH_USERNAME" \
           -var="aws_access_key_id=$AWS_ACCESS_KEY_ID" \ 
           -var="aws_secret_access_key=$AWS_ACCESS_KEY_ID" \
           -no-color -auto-approve -input=false
@@ -98,3 +101,6 @@ jobs:
       env:
         VM_SKU: ${{ github.event.inputs.vm_sku }}
         MAX_BID: ${{ github.event.inputs.max_bid }}
+        CLOUD_INIT: ${{ github.event.inputs.cloud-init-template }}
+        VM_USERNAME: ${{ github.event.inputs.vm_username }}
+        GH_USERNAME: ${{ github.event.inputs.github_username }}

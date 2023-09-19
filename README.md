@@ -48,6 +48,7 @@ TODO: customize the user-data files to use gaming drivers as well: https://docs.
    - [Run Infracost automatically in your Github Actions Workflows](https://github.com/infracost/actions)
    - [Check out the project out on Github](https://github.com/infracost/infracost)
 
+
 ## Get Started
 
 1. Create the Terraform state bucket
@@ -108,6 +109,35 @@ TODO: customize the user-data files to use gaming drivers as well: https://docs.
       -v $(pwd):/terraform -w /terraform hashicorp/terraform init -upgrade
     ```
 
+## Instance Types
+
+This project is tested using the G5, G4dn, and G3 sinatnce tiers which utilize Nvidia A10, T4 and M60 GPUs. If you do not need a GPU, you are advised to consider Hetzner or Equinix who have better prices on CPU-only instances. Buildstar Online has a quota maximum limit of 48 vCores in eu-central.
+
+- G5 instances feature NVIDIA A10G Tensor Core GPUs and second generation AMD EPYC processors.
+
+    | Instance Size| GPUs | GPU RAM | vCPUs | RAM (GiB) | Disk Size (GB) | Network (Gbps) |
+    |   ---        |  --- |  ---    |    ---|        ---|             ---|             ---|
+    | g5.xlarge    | 1    | 24      | 4     | 16        | 250            | 10             |
+    | g5.2xlarge   | 1    | 24      | 8     | 32        | 450            | 10             |
+    | g5.4xlarge   | 1    | 24      | 16    | 64        | 600            | 25             |
+    | g5.12xlarge  | 4    | 96      | 48    | 192       | 3800           | 40             |
+
+- G4dn instances feature NVIDIA T4 GPUs and custom Intel Cascade Lake CPU
+
+    | Instance Size| GPUs | GPU RAM | vCPUs | RAM (GiB) | Disk Size (GB) | Network (Gbps) |
+    |   ---        |  --- |  ---    |    ---|        ---|             ---|             ---|
+    | g4dn.xlarge  | 1    | 16      | 4     | 16        | 125            | 25             |
+    | g4dn.2xlarge | 1    | 16      | 8     | 32        | 225            | 25             |
+    | g4dn.4xlarge | 1    | 16      | 16    | 64        | 225            | 25             |
+    | g4dn.12xlarge| 4    | 64      | 48    | 192       | 900            | 50             |
+
+- G3 instances provides access to NVIDIA Tesla M60 GPUs, each with up to 2,048 parallel processing cores and 8 GiB of GPU memory in a dual-socket Intel Xeon E5 2686 v4 system.
+
+    | Instance Size| GPUs | GPU RAM | vCPUs | RAM (GiB) | Disk Size (GB) | Network (Gbps) |
+    |   ---        |  --- |  ---    |    ---|        ---|             ---|             ---|
+    | g3s.xlarge   | 1    | 8       | 4     | 16        | not included   | 20             |
+    | g3.4xlarge   | 1    | 8       | 16    | 32        | not included   | 20             |
+    | g3.8xlarge   | 2    | 16      | 32    | 64        | not included   | 20             |
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements

@@ -1,6 +1,0 @@
-Instance, GPU, vRAM (GB), GPU Date, vCores, RAM (Gib), CPU Model, CPU Date, Price
-p3.2xlarge, V100, 16, 2017, 8, 61, Xeon E5-2686 v4, 2016, $1.1469
-p2.xlarge, k80, 12, 2014, 4, 61, Xeon E5-2686 v4, 2016, $0.3978
-g5.xlarge, A10G, 24, 2021, 4, 16, AMD Epyc Rome Zen2, 2019, $0.3774
-g4dn.xlarge, T4, 16, 2018, 4, 16, Xeon Platinum 8259L, 2019, $0.1974
-g3s.xlarge, M60, 8, 2015, 4, 30.5, Xeon E5-2686 v4, 2016, $0.2814

@@ -1,22 +1,40 @@
 #cloud-config
-hostname: aws-bradley
-fqdn: aws-bradley
+hostname: ${HOSTNAME}
 disable_root: false
 network:
   config: disabled
 users:
-  - name: max
+  - name: ${USERNAME}
     groups: users, admin, docker, sudo
     sudo: ALL=(ALL) NOPASSWD:ALL
     shell: /bin/bash
     lock_passwd: false
     ssh_import_id:
-      - gh:cloudymax
+      - gh:${GITHUB_USERNAME}
 bootcmd:
  - test -z "$(blkid /dev/nvme1n1)" && mkfs -t ext4 -L data /dev/nvme1n1
  - mkdir -p /data
+ - mkdir -p /home/${USERNAME}/.aws
 mounts:
  - [ "/dev/nvme1n1", "/data", "ext4", "defaults,nofail", "0", "2" ]
+write_files:
+- path: /etc/modprobe.d/blacklist.conf
+  content: |
+    blacklist vga16fb
+    blacklist nouveau
+    blacklist rivafb
+    blacklist nvidiafb
+    blacklist rivatv
+- path: /home/${USERNAME}/.aws/credentials
+  content: |
+    [default]
+    aws_access_key_id = ${AWS_ACCESS_KEY_ID}
+    aws_secret_access_key = ${AWS_SECRET_ACCESS_KEY}
+- path: /home/${USERNAME}/.aws/config
+  content: |
+    [default]
+    region = ${REGION}
+    output = json
 package_update: true
 package_upgrade: true
 packages: 
@@ -47,6 +65,7 @@ packages:
   - pkg-config
   - libvulkan1
   - rsync
+  - zip
 runcmd:
   - mkdir -p /data/var
   - mkdir -p /data/usr
@@ -63,44 +82,37 @@ runcmd:
   - chmod +x /usr/bin/yq
   ######################
   # Install Docker
-  - sudo chown -R friend:friend /home/friend
+  - sudo chown -R ${USERNAME}:${USERNAME} /home/${USERNAME}
   - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
   - echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
   - sudo apt-get update 
   - sudo apt-get install -y docker-ce
   ########################
   # Install Docker Compose
-  - sudo -u friend -i mkdir -p /home/friend/.docker/cli-plugins/
-  - sudo -u friend -i curl -SL https://github.com/docker/compose/releases/download/v2.17.3/docker-compose-linux-x86_64 -o  /home/friend/.docker/cli-plugins/docker-compose
-  - sudo chmod +x /home/friend/.docker/cli-plugins/docker-compose
+  - sudo -u ${USERNAME} -i mkdir -p /home/${USERNAME}/.docker/cli-plugins/
+  - sudo -u ${USERNAME} -i curl -SL https://github.com/docker/compose/releases/download/v2.17.3/docker-compose-linux-x86_64 -o  /home/${USERNAME}/.docker/cli-plugins/docker-compose
+  - sudo chmod +x /home/${USERNAME}/.docker/cli-plugins/docker-compose
   ########################
   # Brew and Python3
   - wget https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh
   - chmod +x /install.sh
   - chmod 777 /install.sh
-  - sudo -u friend NONINTERACTIVE=1 /bin/bash /install.sh
-  - sudo -u friend /home/linuxbrew/.linuxbrew/bin/brew shellenv >> /home/friend/.profile
-  - sudo -u friend /home/linuxbrew/.linuxbrew/opt/python@3.11/libexec/bin >> /home/friend/.profile
-  - sudo -u friend /home/linuxbrew/.linuxbrew/bin/brew install python@3.11 k9s neovim helm
-  - sudo -u friend /home/linuxbrew/.linuxbrew/bin/pip3.11 install smol-k8s-lab onboardme
-  - sudo mkdir -p /home/friend/.config/smol-ka8s-lab
-  - sudo chown -R friend:friend /home/linuxbrew
-  - sudo chown -R friend:friend /home/friend
-  #######################
-  # Prometheus
-  - wget -O /opt/node_exporter-1.6.1.linux-amd64.tar.gz https://github.com/prometheus/node_exporter/releases/download/v1.6.1/node_exporter-1.6.1.linux-amd64.tar.gz
-  - tar -xvf /opt/node_exporter-1.6.1.linux-amd64.tar.gz -C /opt
-  - rm /opt/node_exporter-1.6.1.linux-amd64.tar.gz
-  - ln -s node_exporter-1.6.1.linux-amd64 /opt/node_exporter
-  - wget https://raw.githubusercontent.com/small-hack/smol-metal/main/node-exporter.service
-  - sudo mv node-exporter.service /etc/systemd/system/node-exporter.service
+  - sudo -u ${USERNAME} NONINTERACTIVE=1 /bin/bash /install.sh
+  - sudo -u ${USERNAME} /home/linuxbrew/.linuxbrew/bin/brew shellenv >> /home/${USERNAME}/.profile
+  - sudo -u ${USERNAME} /home/linuxbrew/.linuxbrew/opt/python@3.11/libexec/bin >> /home/${USERNAME}/.profile
+  - sudo -u ${USERNAME} /home/linuxbrew/.linuxbrew/bin/brew install python@3.11 neovim
+  - sudo chown -R ${USERNAME}:${USERNAME} /home/linuxbrew
+  - sudo chown -R ${USERNAME}:${USERNAME} /home/${USERNAME}
   ########################
   # Start system services
   - systemctl daemon-reload
-  - systemctl enable node-exporter
-  - systemctl restart node-exporter
   - sudo systemctl enable fail2ban
   - sudo systemctl start fail2ban
+  ########################
+  # AWS CLI
+  - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+  - unzip awscliv2.zip
+  - sudo ./aws/install
   ########################
   # Nvidia driver
   - wget curl https://raw.githubusercontent.com/GoogleCloudPlatform/compute-gpu-installation/main/linux/install_gpu_driver.py -O install_gpu_driver.py

@@ -10,12 +10,32 @@ users:
     shell: /bin/bash
     lock_passwd: false
     passwd: "$6$rounds=4096$saltsaltlettuce$Lp/FV.2oOgew7GbM6Nr8KMGMBn7iFM0x9ZwLqtx9Y4QJmKvfcnS.2zx4MKmymCPQGpHS7gqYOiqWjvdCIV2uN."
+    ssh_import_id:
+      - gh:${GITHUB_USERNAME}
 bootcmd:
-  - test -z "$(blkid /dev/nvme1n1)" && mkfs -t ext4 -L data /dev/nvme1n1
-  - mkdir -p /data
-  - sudo apt-get update
-  - sudo apt-get install -y ssh-import-id
-  - sudo -u ${USERNAME} ssh-import-id-gh ${GITHUB_USERNAME}
+ - test -z "$(blkid /dev/nvme1n1)" && mkfs -t ext4 -L data /dev/nvme1n1
+ - mkdir -p /data
+ - mkdir -p /home/${USERNAME}/.aws
+mounts:
+ - [ "/dev/nvme1n1", "/data", "ext4", "defaults,nofail", "0", "2" ]
+write_files:
+- path: /etc/modprobe.d/blacklist.conf
+  content: |
+    blacklist vga16fb
+    blacklist nouveau
+    blacklist rivafb
+    blacklist nvidiafb
+    blacklist rivatv
+- path: /home/${USERNAME}/.aws/credentials
+  content: |
+    [default]
+    aws_access_key_id = ${AWS_ACCESS_KEY_ID}
+    aws_secret_access_key = ${AWS_SECRET_ACCESS_KEY}
+- path: /home/${USERNAME}/.aws/config
+  content: |
+    [default]
+    region = ${REGION}
+    output = json
 package_update: true
 package_upgrade: true
 packages: 
@@ -48,6 +68,16 @@ packages:
   - rsync
   - zip
 runcmd:
+  - sudo -u ${USERNAME} ssh-import-id-gh ${GITHUB_USERNAME}
+  - mkdir -p /data/var
+  - mkdir -p /data/usr
+  - mkdir -p /data/home
+  - rsync -avz /var/ /data/var
+  - rsync -avz /usr/ /data/usr
+  - rsync -avz /home/ /data/home
+  - mount -o bind /data/var /var
+  - mount -o bind /data/usr /usr
+  - mount -o bind /data/home /home
   ######################
   # Install YQ
   - wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq &&\
@@ -101,3 +131,4 @@ runcmd:
   - apt-get install -y nvidia-container-toolkit
   - nvidia-ctk runtime configure --runtime=docker --set-as-default
   - systemctl restart docker
+

@@ -32,7 +32,7 @@ ingress_rules = ["http-80-tcp",
 
 # EC2 Options
 ec2_instance_type   = "g5.2xlarge"
-max_spot_price      = 0.60
+max_spot_price      = 0.70
 spot_type           = "one-time"
 username            = "friend"
 hostname            = "ec2spot"

@@ -63,7 +63,7 @@ TODO: customize the user-data files to use gaming drivers as well: https://docs.
       LocationConstraint=$REGION
 
     aws s3api put-bucket-encryption --bucket $STATE_BUCKET \
-      --server-side-encryption-configuration "{\"Rules\": [{\"ApplyServerSideEncryptionByDefault \":{\"SSEAlgorithm\": \"AES256\"}}]}"
+      --server-side-encryption-configuration '{"Rules": [{"ApplyServerSideEncryptionByDefault": {"SSEAlgorithm": "AES256"}}]}'
 
     aws dynamodb create-table --table-name Terraform-backend-lock \
       --attribute-definitions AttributeName=LockID,AttributeType=S \

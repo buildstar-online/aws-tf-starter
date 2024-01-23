@@ -10,8 +10,6 @@ users:
     shell: /bin/bash
     lock_passwd: false
     passwd: "$6$rounds=4096$saltsaltlettuce$Lp/FV.2oOgew7GbM6Nr8KMGMBn7iFM0x9ZwLqtx9Y4QJmKvfcnS.2zx4MKmymCPQGpHS7gqYOiqWjvdCIV2uN."
-    ssh_import_id:
-      - gh:${GITHUB_USERNAME}
 bootcmd:
   - mkfs -t ext4 -L data /dev/nvme1n1
   - mkdir -p /data
@@ -22,17 +20,6 @@ package_update: true
 package_upgrade: true
 packages: 
   - ssh-import-id
-  - curl
-  - tmux
-  - apt-transport-https
-  - ca-certificates
-  - software-properties-common
-  - htop
-  - rsync
-  - zip
 runcmd:
-  - sudo -u ${USERNAME} ssh-import-id-gh ${GITHUB_USERNAME}
-  - mkdir -p /data/var
-  - mkdir -p /data/usr
-  - mkdir -p /data/home
+  - sudo -u ${USERNAME} -i ssh-import-id-gh ${GITHUB_USERNAME}
 

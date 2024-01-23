@@ -13,11 +13,11 @@ users:
     ssh_import_id:
       - gh:${GITHUB_USERNAME}
 bootcmd:
- - mkfs -t ext4 -L data /dev/nvme1n1
- - mkdir -p /data
- - mkdir -p /home/${USERNAME}/.aws
+  - mkfs -t ext4 -L data /dev/nvme1n1
+  - mkdir -p /data
+  - mkdir -p /home/${USERNAME}/.aws
 mounts:
- - [ "/dev/nvme1n1", "/data", "ext4", "defaults,nofail", "0", "2" ]
+  - [ "/dev/nvme1n1", "/data", "ext4", "defaults,nofail", "0", "2" ]
 package_update: true
 package_upgrade: true
 packages: 
@@ -35,11 +35,4 @@ runcmd:
   - mkdir -p /data/var
   - mkdir -p /data/usr
   - mkdir -p /data/home
-  #- rsync -avz /var/ /data/var
-  #- rsync -avz /usr/ /data/usr
-  #- rsync -avz /home/ /data/home
-  #- mount -o bind /data/var /var
-  - mount -o bind /data/usr /usr
-  - mount -o bind /data/home /home
-  - systemctl restart docker
 

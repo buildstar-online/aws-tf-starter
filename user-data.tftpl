@@ -10,7 +10,5 @@ users:
     shell: /bin/bash
     lock_passwd: false
     passwd: "$6$rounds=4096$saltsaltlettuce$Lp/FV.2oOgew7GbM6Nr8KMGMBn7iFM0x9ZwLqtx9Y4QJmKvfcnS.2zx4MKmymCPQGpHS7gqYOiqWjvdCIV2uN."
-bootcmd:
-  - sudo apt-get update
-  - sudo apt-get install -y ssh-import-id
-  - sudo -u ${USERNAME} -i ssh-import-id-gh ${GITHUB_USERNAME}
+    ssh_import_id:
+      - gh:${GITHUB_USERNAME}

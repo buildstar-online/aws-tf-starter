@@ -11,15 +11,6 @@ users:
     lock_passwd: false
     passwd: "$6$rounds=4096$saltsaltlettuce$Lp/FV.2oOgew7GbM6Nr8KMGMBn7iFM0x9ZwLqtx9Y4QJmKvfcnS.2zx4MKmymCPQGpHS7gqYOiqWjvdCIV2uN."
 bootcmd:
-  - mkfs -t ext4 -L data /dev/nvme1n1
-  - mkdir -p /data
-  - mkdir -p /home/${USERNAME}/.aws
-mounts:
-  - [ "/dev/nvme1n1", "/data", "ext4", "defaults,nofail", "0", "2" ]
-package_update: true
-package_upgrade: true
-packages: 
-  - ssh-import-id
-runcmd:
+  - sudo apt-get update
+  - sudo apt-get install -y ssh-import-id
   - sudo -u ${USERNAME} -i ssh-import-id-gh ${GITHUB_USERNAME}
-

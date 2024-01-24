@@ -31,9 +31,12 @@ runcmd:
   - mkdir -p /data/var
   - mkdir -p /data/usr
   - mkdir -p /data/home
+  - mkdir -p /data/tmp
   - rsync -az --info=progress2 /var/ /data/var
   - rsync -az --info=progress2 /usr/ /data/usr
   - rsync -az --info=progress2 /home/ /data/home
+  - rsync -az --info=progress2 /tmp/ /data/tmp
   - mount -o bind /data/var /var
   - mount -o bind /data/usr /usr
   - mount -o bind /data/home /home
+  - mount -o bind /data/tmp /tmp

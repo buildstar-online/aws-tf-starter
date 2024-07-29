@@ -17,9 +17,35 @@ mounts:
 bootcmd:
   - test -z "$(blkid /dev/nvme1n1)" && mkfs -t ext4 -L data /dev/nvme1n1
   - mkdir -p /data
-package_update: true
-package_upgrade: true
-packages: 
+write_files:
+- path: /etc/apt/sources.list
+  content: |
+    deb http://deb.debian.org/debian bookworm main contrib non-free non-free-firmware
+    deb-src http://deb.debian.org/debian bookworm main contrib non-free non-free-firmware
+    deb http://deb.debian.org/debian-security/ bookworm-security main contrib non-free
+    deb-src http://deb.debian.org/debian-security/ bookworm-security main contrib non-free
+    deb http://deb.debian.org/debian bookworm-updates main contrib non-free
+    deb-src http://deb.debian.org/debian bookworm-updates main contrib non-free
+    deb http://deb.debian.org/debian bookworm-backports main
+    deb http://deb.debian.org/debian bullseye-backports main
+- path: /home/${username}/.config/systemd/user/sunshine.service
+  content: |
+    [Unit]
+    Description=Sunshine self-hosted game stream host for Moonlight.
+    StartLimitIntervalSec=500
+    StartLimitBurst=5
+
+    [Service]
+    ExecStart=/usr/bin/sunshine
+    Restart=on-failure
+    RestartSec=5s
+
+    [Install]
+    WantedBy=graphical-session.target
+
+    package_update: true
+    package_upgrade: true
+packages:
   - sudo
   - curl
   - tmux
@@ -27,51 +53,52 @@ packages:
   - libvulkan1
   - rsync
   - zip
+  - wireguard
+  - ssh-import-id
+  - sudo
+  - curl
+  - tmux
+  - netplan.io
+  - apt-transport-https
+  - ca-certificates
+  - software-properties-common
+  - htop
+  - git-extras
+  - rsyslog
+  - fail2ban
+  - neovim
+  - gpg
+  - open-iscsi
+  - nfs-common
+  - ncdu
+  - zip
+  - unzip
+  - pkg-config
+  - iotop
+  - tasksel
+  - build-essential
+  - dkms
+  - mdevctl
+  - firmware-misc-nonfree
+  - linux-headers-amd64
+  - gcc
+  - make
+  - libvulkan1
+  - libglvnd-dev
+  - uuid-runtime
+  - firmware-misc-nonfree
+  - linux-headers-amd64
+  - gcc
+  - libvulkan1
+  - libglvnd-dev
+  - x11vnc
+  - dbus-x11
+  - xinit
+  - xorg
+  - xvfb
 runcmd:
-  - mkdir -p /data/var
-  - mkdir -p /data/usr
-  - mkdir -p /data/home
-  - mkdir -p /data/tmp
-  - rsync -az --info=progress2 /var/ /data/var
-  - rsync -az --info=progress2 /usr/ /data/usr
-  - rsync -az --info=progress2 /home/ /data/home
-  - rsync -az --info=progress2 /tmp/ /data/tmp
-  - mount -o bind /data/var /var
-  - mount -o bind /data/usr /usr
-  - mount -o bind /data/home /home
-  - mount -o bind /data/tmp /tmp
-  ######################
-  - |
-    sudo apt-get update && \
-    apt-get install -y wireguard \
-    ssh-import-id \
-    sudo \
-    curl \
-    tmux \
-    netplan.io \
-    apt-transport-https \
-    ca-certificates \
-    software-properties-common \
-    htop \
-    git-extras \
-    rsyslog \
-    fail2ban \
-    vim \
-    gpg \
-    open-iscsi \
-    nfs-common \
-    ncdu \
-    zip \
-    unzip \
-    iotop \
-    ubuntu-drivers-common \
-    linux-headers-generic \
-    gcc \
-    kmod \
-    make \
-    pkg-config \
-    libvulkan1 \
-    libglvnd-dev 
+  - sudo apt-get install -y linux-headers-`uname -r`
+  - ssh-import-id-gh ${GITHUB_USERNAME}
   ######################
   # Install YQ
   - wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq &&\
@@ -81,7 +108,7 @@ runcmd:
   - sudo chown -R ${USERNAME}:${USERNAME} /home/${USERNAME}
   - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
   - echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-  - sudo apt-get update 
+  - sudo apt-get update
   - sudo apt-get install -y docker-ce
   ########################
   # Install Docker Compose
@@ -96,7 +123,6 @@ runcmd:
   - sudo -u ${USERNAME} NONINTERACTIVE=1 /bin/bash /install.sh
   - sudo -u ${USERNAME} /home/linuxbrew/.linuxbrew/bin/brew shellenv >> /home/${USERNAME}/.profile
   - sudo -u ${USERNAME} /home/linuxbrew/.linuxbrew/opt/python@3.11/libexec/bin >> /home/${USERNAME}/.profile
-  - sudo -u ${USERNAME} /home/linuxbrew/.linuxbrew/bin/brew install python@3.11 neovim
   - sudo chown -R ${USERNAME}:${USERNAME} /home/linuxbrew
   - sudo chown -R ${USERNAME}:${USERNAME} /home/${USERNAME}
   ########################
@@ -117,7 +143,7 @@ runcmd:
   ########################
   # Container Runtime
   - |
-    distribution=$(. /etc/os-release;echo $ID$VERSION_ID) && \
+    distribution=debian11 && \
     curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg && \
     curl -s -L https://nvidia.github.io/libnvidia-container/$distribution/libnvidia-container.list | \
       sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
@@ -126,3 +152,6 @@ runcmd:
   - apt-get install -y nvidia-container-toolkit
   - nvidia-ctk runtime configure --runtime=docker --set-as-default
   - systemctl restart docker
+  #########################
+  # Desktop
+  - DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC sudo tasksel install xfce-desktop

@@ -22,7 +22,7 @@ data template_file "this" {
     HOSTNAME               = var.hostname
     USERNAME               = var.username
     GITHUB_USERNAME        = var.github_username
-    AWS_ACCESS_KEY_ID      = var.aws_access_key_id 
+    AWS_ACCESS_KEY_ID      = var.aws_access_key_id
     AWS_SECRET_ACCESS_KEY  = var.aws_secret_access_key
     REGION                 = var.region
   }
@@ -40,12 +40,12 @@ module "ec2_instance" {
 
   spot_wait_for_fulfillment   = true
   ami                         = data.aws_ami.ubuntu.id
-  
+
   instance_type               = var.ec2_instance_type
   monitoring                  = true
   vpc_security_group_ids      = [module.security_group.security_group_id]
   subnet_id                   = element(module.vpc.public_subnets, 0)
-  
+
   associate_public_ip_address = true
   user_data                   = "${data.template_file.this.rendered}"
   user_data_replace_on_change = true
@@ -54,6 +54,15 @@ module "ec2_instance" {
 
   spot_launch_group                = null
   spot_block_duration_minutes      = null
+
+  root_block_device = [
+    {
+      encrypted   = false
+      volume_type = "gp3"
+      throughput  = 700
+      volume_size = 250
+    }
+  ]
 
   tags = {
     Terraform   = "true"

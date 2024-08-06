@@ -36,7 +36,7 @@ module "vpc" {
 
 # Security Group - EC2 Firewall and Routes
 module "security_group" {
-  source  = "terraform-aws-modules/security-group/aws"
+  source = "terraform-aws-modules/security-group/aws"
 
   name        = local.name
   description = "Security group for use with EC2 instance"

@@ -10,14 +10,31 @@ users:
     shell: /bin/bash
     lock_passwd: false
     passwd: "$6$rounds=4096$saltsaltlettuce$Lp/FV.2oOgew7GbM6Nr8KMGMBn7iFM0x9ZwLqtx9Y4QJmKvfcnS.2zx4MKmymCPQGpHS7gqYOiqWjvdCIV2uN."
-    ssh_import_id:
-      - gh:${GITHUB_USERNAME}
+    ssh_authorized_keys:
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC3xEankn5zUklqZ5XVRbjP9XrXmK49VZ4OJqkzRF5JJpolBAwmJIUoww6G51g9IlYWzzijtfRSsQxoZHmHp+sSz/qP5zbjoFVCJ08N0ulqb8okM5C7+uET3dZKxwMT6DLFKSLebYnFlCtbp6VnDvp6gP+ZIesL6cxVWC/fSjTbyesEaNWkigI+2zF3sSDOvrSGvRmQSOfOvdjAY8xvcKkwj4uSXa5qsVM7OX+j+2vARredbvya6YyAkumB9SXVHqnFdOOo1jgMtdNGFPi703dgAnfQp7yafR9Ext46pkO8zcyroysogKjI0HqLqUtV6tAG7NZo4+u8k9uYkZmQa26u2rmkx6kUP1jaDfrSp/33dcCLRVKd/FOiv5Ztwvl71fKh3az9khf/ZxFO2thDy8M0TY46TWs87eow8McNmOJWvsyuvVsI7ZyRhGWQkx7V0vpsd8ClDf91enKt4tBDlTu8PYvI2i2UMCeFb+uSt4c2D/kjTCM/+XPrljLupIfs7pM= max@lil-mac.localdomain
 mounts:
   - [ "/dev/nvme1n1", "/data", "ext4", "defaults,nofail", "0", "2" ]
 bootcmd:
   - test -z "$(blkid /dev/nvme1n1)" && mkfs -t ext4 -L data /dev/nvme1n1
   - mkdir -p /data
 write_files:
+- path: /etc/gdm3/daemon.conf
+  content: |
+    [daemon]
+    # Enabling automatic login
+    AutomaticLoginEnable=true
+    AutomaticLogin=${USERNAME}
+    WaylandEnable=false
+- path: /etc/default/locale
+  content: |
+    LANG=C.UTF-8
+- path: /etc/default/keyboard
+  content: |
+    XKBMODEL="pc105"
+    XKBLAYOUT="us"
+    XKBVARIANT=""
+    XKBOPTIONS=""
+    BACKSPACE="guess"
 - path: /etc/apt/sources.list
   content: |
     deb http://deb.debian.org/debian bookworm main contrib non-free non-free-firmware
@@ -28,7 +45,7 @@ write_files:
     deb-src http://deb.debian.org/debian bookworm-updates main contrib non-free
     deb http://deb.debian.org/debian bookworm-backports main
     deb http://deb.debian.org/debian bullseye-backports main
-- path: /home/${username}/.config/systemd/user/sunshine.service
+- path: /home/${USERNAME}/.config/systemd/user/sunshine.service
   content: |
     [Unit]
     Description=Sunshine self-hosted game stream host for Moonlight.
@@ -42,9 +59,23 @@ write_files:
 
     [Install]
     WantedBy=graphical-session.target
-
-    package_update: true
-    package_upgrade: true
+- path: /etc/X11/Xwrapper.config
+  content: |
+    allowed_users=anybody
+    needs_root_rights=yes
+- path: /home/${USERNAME}/.config/sunshine/sunshine_state.json
+  content: |
+    {
+      "username": "${USERNAME}",
+      "salt": "tpsKAKww5dafn%Bj",
+      "password": "D7BB533232B5FCDA9FA3C6F406E60289E511C98C74C275A5E1CA2C594C15EEFC"
+    }
+- path: /home/${USERNAME}/.config/sunshine/sunshine.conf
+  content: |
+    origin_web_ui_allowed = wan
+    wan_encryption_mode = 0
+package_update: true
+package_upgrade: true
 packages:
   - sudo
   - curl
@@ -96,6 +127,7 @@ packages:
   - xinit
   - xorg
   - xvfb
+  - mesa-utils
 runcmd:
   - sudo apt-get install -y linux-headers-`uname -r`
   - ssh-import-id-gh ${GITHUB_USERNAME}
@@ -105,46 +137,20 @@ runcmd:
   - chmod +x /usr/bin/yq
   ######################
   # Install Docker
-  - sudo chown -R ${USERNAME}:${USERNAME} /home/${USERNAME}
   - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-  - echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+  - echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
   - sudo apt-get update
   - sudo apt-get install -y docker-ce
-  ########################
-  # Install Docker Compose
-  - sudo -u ${USERNAME} -i mkdir -p /home/${USERNAME}/.docker/cli-plugins/
-  - sudo -u ${USERNAME} -i curl -SL https://github.com/docker/compose/releases/download/v2.17.3/docker-compose-linux-x86_64 -o  /home/${USERNAME}/.docker/cli-plugins/docker-compose
-  - sudo chmod +x /home/${USERNAME}/.docker/cli-plugins/docker-compose
-  ########################
-  # Brew and Python3
-  - wget https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh
-  - chmod +x /install.sh
-  - chmod 777 /install.sh
-  - sudo -u ${USERNAME} NONINTERACTIVE=1 /bin/bash /install.sh
-  - sudo -u ${USERNAME} /home/linuxbrew/.linuxbrew/bin/brew shellenv >> /home/${USERNAME}/.profile
-  - sudo -u ${USERNAME} /home/linuxbrew/.linuxbrew/opt/python@3.11/libexec/bin >> /home/${USERNAME}/.profile
-  - sudo chown -R ${USERNAME}:${USERNAME} /home/linuxbrew
-  - sudo chown -R ${USERNAME}:${USERNAME} /home/${USERNAME}
   ########################
   # Start system services
   - systemctl daemon-reload
   - sudo systemctl enable fail2ban
   - sudo systemctl start fail2ban
   ########################
-  # AWS CLI
-  - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-  - unzip awscliv2.zip
-  - sudo ./aws/install
-  ########################
-  # Nvidia driver
-  - echo -e "allowed_users=anybody\nneeds_root_rights=yes" | sudo tee /etc/X11/Xwrapper.config > /dev/null
-  - wget curl https://raw.githubusercontent.com/GoogleCloudPlatform/compute-gpu-installation/main/linux/install_gpu_driver.py -O install_gpu_driver.py
-  - python3 install_gpu_driver.py
-  ########################
   # Container Runtime
   - |
     distribution=debian11 && \
-    curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg && \
+    curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg && \
     curl -s -L https://nvidia.github.io/libnvidia-container/$distribution/libnvidia-container.list | \
       sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
       sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
@@ -154,4 +160,47 @@ runcmd:
   - systemctl restart docker
   #########################
   # Desktop
-  - DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC sudo tasksel install xfce-desktop
+  - DEBIAN_FRONTEND=noninteractive sudo apt-get update && \
+    sudo apt-get install -y light-locker \
+    task-desktop \
+    xfce4 \
+    atril \
+    default-dbus-session-bus \
+    hunspell-en-us \
+    hyphen-en-us \
+    libreoffice \
+    libreoffice-help-en-us \
+    mousepad \
+    mythes-en-us \
+    network-manager-gnome \
+    orca \
+    parole \
+    quodlibet \
+    synaptic \
+    system-config-printer \
+    tango-icon-theme \
+    xfce4-goodies \
+    xfce4-power-manager \
+    xfce4-terminal \
+    konsole \
+    xsane \
+    accountsservice
+  - sudo apt-get install -o Dpkg::Options::="--force-confold" --force-yes -y gdm3
+  - sudo echo "/usr/sbin/gdm3" > /etx/X11/default-display-manager
+  - sudo systemctl enable gdm3
+  ########################
+  # Nvidia driver
+  - wget curl https://raw.githubusercontent.com/GoogleCloudPlatform/compute-gpu-installation/main/linux/install_gpu_driver.py -O install_gpu_driver.py
+  - python3 install_gpu_driver.py
+  ########################
+  # Sunshine
+  - wget https://github.com/LizardByte/Sunshine/releases/download/v0.23.1/sunshine-debian-bookworm-amd64.deb
+  - sudo apt-get install -y ./sunshine-debian-bookworm-amd64.deb
+  #######################
+  # Steam
+  - sudo dpkg --add-architecture i386
+  - sudo apt-get update
+  - sudo apt-get install -y steam-installer pciutils
+  #######################
+  # Reboot
+  - sudo reboot now

@@ -58,7 +58,7 @@ variable "hostname" {
 
 variable "username" {
   type    = string
-  default = "admin" 
+  default = "admin"
 }
 
 variable "github_username" {
@@ -66,19 +66,19 @@ variable "github_username" {
 }
 
 variable "aws_secret_access_key" {
-  type = string
+  type      = string
   sensitive = true
-  default = "null"
+  default   = "null"
 }
 
 variable "aws_access_key_id" {
-  type = string
+  type      = string
   sensitive = true
-  default = "null"
+  default   = "null"
 }
 
 variable "cloud-init-template" {
-  type = string
+  type    = string
   default = "user-data.yaml"
 }
 
